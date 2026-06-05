@@ -13,7 +13,7 @@ If you don't have administrator privileges on your machine, though, you can at l
 
 ## For Linux systems
 
-### Red Hat family of distributions
+### Red Hat family of distributions (Fedora, RHEL, AlmaLinux, etc)
 
 #### Root CA
 
@@ -74,27 +74,17 @@ sudo dnf install -y epel-next-release
 After that you can install CAC software like any other package:
 
 ``` bash
-sudo dnf install -y esc opensc pcsc-lite pcsc-tools
+sudo dnf install -y esc opensc '*pcsc*'
+sudo systemctl daemon-reload
 sudo systemctl enable --now pcscd.service
 ```
 
 You can test to see if the computer properly recognizes your inserted CAC by running
 ``` bash
-pcsc_scan
+pkcs11-tool --list-slots
 ```
 
-It should fairly quickly list a reader, and card attributes, something like
-```
- Reader 0: Broadcom Corp xxxxx [Contacted SmartCard] (xxxxxxxxxxxxxx) 00 00
-  Card state: Card inserted, Shared Mode,
-  ATR: XX XX XX XX XX XX XX XX XX XX XX XX XX XX XX
-
-ATR: XX XX XX XX XX XX XX XX XX XX XX XX XX XX XX
-+ TS = ...
-+ T0 = ...
-  TA(1) = ...
-```
-Hit <kbd>Ctrl</kbd>+<kbd>C</kbd> to end the scan.
+That should return some basic info about the smart card and card reader, including the device brand and your token label (generally your name + an ID number).
 
 **Reboot.**
 
@@ -121,7 +111,7 @@ But you could import into your browser in the meanwhile, in the section further 
 
 #### CAC
 
-Your organization might commonly provide licensed copies of ActivID ActivClient, by HID Global --- if so, you maybe ought to use that, provided by your IT department.
+Your organization might provide licensed copies of ActivID ActivClient, by HID Global --- if so, you maybe ought to use that, provided by your IT department.
 
 Otherwise, you can get [OpenSC](https://github.com/OpenSC/OpenSC/wiki) for free.
 Go to the [latest release page](https://github.com/OpenSC/OpenSC/releases/latest),
