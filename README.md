@@ -89,6 +89,48 @@ That should return some basic info about the smart card and card reader, includi
 **Reboot.**
 
 
+### Debian family of distributions (Ubuntu, etc)
+
+#### Root CA
+
+Enable the unofficial APT repositories for your system: `main`, `universe`, `restricted`, `multiverse`.
+Then,
+
+``` bash
+sudo apt update
+sudo apt install -y openssl ca-certificates libnss3-tools
+
+cd ~/Downloads/
+wget https://dl.dod.cyber.mil/wp-content/uploads/pki-pke/zip/unclass-certificates_pkcs7_DoD.zip
+unzip ./unclass-certificates_pkcs7_DoD.zip
+cd ./Certificates_PKCS7_v5_14_DoD/
+sudo mkdir -p /usr/local/share/ca-certificates
+sudo openssl pkcs7 -print_certs -inform der -in ./Certificates_PKCS7_v5_14_DoD.der.p7b -out /usr/local/share/ca-certificates/DoD_Certs.pem
+# sudo cp -a /usr/local/share/ca-certificates/DoD_Certs.pem /etc/ssl/certs/
+sudo update-ca-certificates
+
+mkdir -p "$HOME/.pki/nssdb"
+chmod 'u=rwX,g=,o=' --recursive "$HOME/.pki/nssdb/"
+sudo mkdir -p /etc/pki/nssdb
+for cert in ./*.der.p7b
+do
+    certutil -A -d "sql:${HOME}/.pki/nssdb/" -t TC -n "DOD CA $( basename $cert .der.p7b )" -i "$cert"
+    sudo certutil -A -d "sql:/etc/pki/nssdb/" -t TC -n "DOD CA $( basename $cert .der.p7b )" -i "$cert"
+done
+
+```
+
+#### CAC
+
+``` bash
+sudo apt install -y cackey opensc pcscd pcsc-tools
+sudo systemctl daemon-reload
+sudo systemctl enable --now pcscd.socket pcscd.service
+
+pkcs11-tool --list-slots
+```
+
+
 
 ## For Windows
 
